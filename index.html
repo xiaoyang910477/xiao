@@ -12,7 +12,7 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;min-height:100vh;col
 @keyframes bounceJump{0%,100%{transform:translateY(-6px);}50%{transform:translateY(0);}}
 @keyframes tipPop{0%{opacity:0;scale(0.92);transform:translateY(10px);}100%{opacity:1;scale(1);transform:translateY(0);}}
 @keyframes folderSlide{0%{opacity:0;transform:translateY(-12px);}100%{opacity:1;transform:translateY(0);}}
-.highlight{background:#ffef00;color:#f00;font-weight:bold;padding:0 3px;border-radius:3px;}
+.highlight{background:#ffef00;color:#f00;font-weight:bold;padding:0 3px;border-radius:3;}
 .top-title{font-size:42px;font-weight:900;margin:20px auto 10px;max-width:1000px;background:linear-gradient(90deg,#ff0044,#ff9900,#ffff00,#00ff88,#00ccff,#9944ff,#ff33aa);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 12px rgba(255,100,200,0.7);animation:rainbowFlow 3s linear infinite,pageFade 0.6s ease-out;}
 @keyframes rainbowFlow{0%{background-position:0% 50%;}100%{background-position:400% 50%;}}
 .page{width:100%;animation:pageFade 0.45s ease-out;}
@@ -66,7 +66,7 @@ button[type="button"]{width:100%;padding:12px;border:none;border-radius:30px;fon
 .btn-row{display:flex;gap:12px;}
 #copyQqBtn{background:#fff;color:#c82460;border:1px solid #ff5599 !important;}
 .main-content{display:none;}
-footer{max-width:1000px;margin:60px auto 0;padding-top:30px;border-top:1px solid #666;color:#aaa;font-size:14px;}
+footer{max-width:1000px;margin:60px auto 0;padding-top:30px;border-top:1px solid #666;color:#aaa;font-size:14px;line-height:1.8;}
 /* ===== 至尊SVIP专属弹窗样式 ===== */
 .svip-modal{
     position:relative;
@@ -318,8 +318,8 @@ footer{max-width:1000px;margin:60px auto 0;padding-top:30px;border-top:1px solid
             <a data-name="联想刷机工具" href="https://meta.box.lenovo.com/v/link/view/17da39f7061040ba81e457583dc56fe0">📱 联想刷机工具</a>
             <a data-name="QPST9008" href="https://wwbjc.lanzoup.com/ijZIn3knztsj">📡 QPST9008</a>
             <a data-name="沐妍工具箱" href="https://wwbjc.lanzouu.com/iyus03ufa0ba">📱 沐妍工具箱（9008）</a>
-            <a data-name="刷机匣" href="https://1850900448.share.123pan.cn/123pan/d7opvd-vvTD">📦 刷机匣</a>
-            <a data-name="搞机助手" href="https://lsdy.lanzoui.com/b0bwa7gif">🤖 搞机助手</a>
+            <a data-name="刷机匣" href="https1850900448.share.123pan.cn/123pan/d7opvd-vvTD">📦 刷机匣</a>
+            <a data-name="搞机助手" href="httpslsdy.lanzoui.com/b0bwa7gif">🤖 搞机助手</a>
             <a data-name="紫罗兰" href="https://wwauy.lanzouv.com/ie36U3rt2yvc">🌸 紫罗兰</a>
             <a data-name="UnlockTool" href="https://1821603385.share.123pan.cn/123pan/7xpfjv-iHs7H">🔓 UnlockTool</a>
             <a data-name="过签名" href="https://1816769606.share.123pan.cn/123pan/O7V6Vv-K3T1v">📜 过签名</a>
@@ -432,7 +432,11 @@ footer{max-width:1000px;margin:60px auto 0;padding-top:30px;border-top:1px solid
     </div>
 </div>
 <div class="back-top" id="backTopBtn" title="返回顶部">⬆️</div>
-<footer>© 2026 小阳个人资源网 | 仅供学习交流</footer>
+<footer>
+© 2026 小阳个人资源网 | 仅供学习交流
+<br>
+<span id="visitCountText">网站总访问次数：加载中...</span>
+</footer>
 <script>
 window.addEventListener('DOMContentLoaded', function(){
     const pwdMask = document.getElementById('pwdMask');
@@ -536,7 +540,7 @@ window.addEventListener('DOMContentLoaded', function(){
         return 'https://' + url;
     }
     function openDetailModal(iconTxt,name,url){
-        // 修复链接协议
+        // 修复链接
         url = fixUrl(url);
         detailIcon.innerText = iconTxt;
         detailName.innerText = name;
@@ -652,6 +656,23 @@ window.addEventListener('DOMContentLoaded', function(){
     document.getElementById('backTopBtn').onclick = ()=>{
         window.scrollTo({top:0,behavior:'smooth'});
     }
+
+    // ========== 全局访问统计代码 ==========
+async function loadVisitCount() {
+  const countDom = document.getElementById("visitCountText");
+  try {
+    const key = "xiaoyang-resource-web-2026";
+    const resp = await fetch(`https://countapi.mileshilliard.com/api/v1/hit/${key}`);
+    const data = await resp.json();
+    // 把 data.count 改成 data.value
+    countDom.innerText = `网站总访问次数：${data.value}`;
+  } catch (err) {
+    let num = Number(localStorage.getItem("siteVisitCount") || 0) + 1;
+    localStorage.setItem("siteVisitCount", num);
+    countDom.innerText = `网站总访问次数：${num}（接口加载失败）`;
+  }
+}
+loadVisitCount();
 })
 </script>
 </body>
