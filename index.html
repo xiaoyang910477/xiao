@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小阳个人资源网</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;transition:all 0.3s;}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;min-height:100vh;color:#fff;background:#222;background-image:url('pg.jpg');background-size:cover;background-position:center;background-attachment:fixed;text-align:center;padding:18px 15px 80px;overflow-x:hidden;font-size:14px;opacity:0;animation:pageFadeIn 0.8s ease forwards;}
+@keyframes pageFadeIn{to{opacity:1;}}
+@keyframes pageFade{0%{opacity:0;transform:translateY(-20px);}100%{opacity:1;transform:translateY(0);}}
+@keyframes bounceJump{0%,100%{transform:translateY(-6px);}50%{transform:translateY(0);}}
+@keyframes tipPop{0%{opacity:0;scale(0.92);transform:translateY(10px);}100%{opacity:1;scale(1);transform:translateY(0);}}
+@keyframes folderSlide{0%{opacity:0;transform:translateY(-12px);}100%{opacity:1;transform:translateY(0);}}
+.highlight{background:#ffef00;color:#f00;font-weight:bold;padding:0 3px;border-radius:3px;}
+.top-title{font-size:42px;font-weight:900;margin:20px auto 10px;max-width:1000px;background:linear-gradient(90deg,#ff0044,#ff9900,#ffff00,#00ff88,#00ccff,#9944ff,#ff33aa);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 12px rgba(255,100,200,0.7);animation:rainbowFlow 3s linear infinite,pageFade 0.6s ease-out;}
+@keyframes rainbowFlow{0%{background-position:0% 50%;}100%{background-position:400% 50%;}}
+.page{width:100%;animation:pageFade 0.45s ease-out;}
+.page2{max-width:1200px;margin:0 auto;width:100%;padding:0 10px 0;}
+.search-box{width:100%;margin-bottom:45px;}
+#searchInput{width:100%;padding:12px 18px;border-radius:30px;border:none;outline:none;font-size:1rem;background:rgba(255,255,255,0.95);color:#222;}
+#searchInput::placeholder{color:#888;}
+.empty-tip{padding:30px;font-size:16px;opacity:0.7;display:none;}
+.folder-box{margin-bottom:32px;background:rgba(255,255,255,0.08);border-radius:20px;padding:20px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12);}
+.folder-title{font-size:18px;font-weight:bold;margin-bottom:16px;color:#fff;text-align:left;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;transition:margin-bottom 0.45s ease;}
+.folder-title::after{content:"▼";font-size:12px;margin-left:auto;transition:transform 0.45s ease;}
+.folder-box.collapsed .folder-title::after{transform:rotate(-90deg);}
+.sub-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;text-align:left;overflow:hidden;max-height:0;opacity:0;transform:translateY(-12px);transition:max-height 0.45s ease,opacity 0.4s ease,transform 0.45s ease;}
+.folder-box:not(.collapsed) .sub-links{max-height:4000px;opacity:1;transform:translateY(0);}
+.sub-links > .folder-box{background:rgba(255,255,255,0.1);padding:14px;border-radius:16px;margin:0 !important;}
+.sub-links .folder-box .folder-title{font-size:15px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;cursor:pointer;}
+.sub-links a{display:block;padding:14px 12px;background:rgba(255,255,255,0.12);color:#fff;border-radius:14px;text-decoration:none;cursor:pointer;transition:all 0.2s ease;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-weight:500;font-size:0.88rem;text-align:center;border:1px solid transparent;}
+.sub-links a:hover{animation:bounceJump 0.8s ease-in-out infinite;box-shadow:0 6px 16px rgba(0,0,0,0.25);background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.3);}
+.back-top{position:fixed;right:24px;bottom:60px;width:56px;height:56px;background:rgba(255,255,255,0.95);border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,0.15),0 0 0 2px rgba(255,77,148,0.6);display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;transition:all 0.25s ease;z-index:9998;color:#222;}
+.back-top:hover{transform:scale(1.15);background:#fff;}
+.back-top:active{transform:scale(0.95);}
+.mask{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99998;background:rgba(0,0,0,0.55);pointer-events:auto;}
+.mask.hidden{display:none !important;}
+.modal-box{position:relative;z-index:99999;background:#ffe6f0;padding:40px 30px;border-radius:20px;width:90%;max-width:400px;box-shadow:0 0 25px #ff77bb;color:#222;animation:tipPop 0.25s ease;}
+.vpn-box{background:#fff;box-shadow:none;padding:35px 25px;border-radius:16px;max-width:360px;}
+.tip-box{background:#fff;padding:20px 30px;border-radius:14px;color:#111;font-size:16px;}
+.detail-modal{position:relative;z-index:99999;background:#ffffff;border-radius:22px;width:92%;max-width:420px;padding:30px 24px;animation:tipPop 0.25s ease;}
+.detail-close{position:absolute;top:14px;right:18px;font-size:26px;color:#888;cursor:pointer;user-select:none;}
+.detail-close:hover{color:#222;transform:scale(1.1);}
+.detail-icon{font-size:80px;text-align:center;margin-bottom:16px;line-height:1;}
+.detail-name{font-size:22px;font-weight:bold;color:#111;text-align:center;margin-bottom:18px;word-break:break-all;}
+.detail-link{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:12px;font-size:14px;color:#333;margin-bottom:24px;outline:none;}
+.detail-link:focus{border-color:#66a3ff;box-shadow:0 0 0 2px rgba(102,163,255,0.2);}
+.detail-btn-wrap{display:flex;gap:14px;}
+.detail-btn-wrap button{flex:1;padding:13px;border:none;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer;transition:0.2s;}
+.btn-copy{background:#f0f4ff;color:#2563eb;}
+.btn-copy:hover{background:#d9e6ff;}
+.btn-jump{background:#2563eb;color:#fff;}
+.btn-jump:hover{background:#1d4ed8;}
+.modal-box h3{color:#c82460;font-size:22px;margin-bottom:25px;}
+.vpn-box h4{color:#222;font-size:20px;margin-bottom:20px;}
+#pwdInput, #vpnPwdInput{width:100%;padding:13px 16px;border-radius:30px;border:1px solid #ff99bb;outline:none;font-size:16px;margin-bottom:20px;background:#fff;color:#222;}
+#vpnPwdInput{border:1px solid #ccc;border-radius:25px;}
+#pwdInput:focus{border-color:#ff4488;box-shadow:0 0 8px #ffb3cc;}
+button[type="button"]{width:100%;padding:12px;border:none;border-radius:30px;font-size:16px;font-weight:bold;cursor:pointer;transition:0.2s;}
+.btn-pink{background:#ff5599;color:#fff;}
+.btn-pink:hover{background:#e03e80;}
+.btn-blue{background:#2563eb;color:white;border-radius:25px;padding:11px;}
+.btn-gray{background:transparent;border:1px solid #999;color:#333;margin-top:10px;padding:10;border-radius:25px;}
+.err-text{color:#c82460;font-size:16px;margin-bottom:22px;line-height:1.6;}
+.btn-row{display:flex;gap:12px;}
+#copyQqBtn{background:#fff;color:#c82460;border:1px solid #ff5599 !important;}
+.main-content{display:none;}
+footer{max-width:1000px;margin:60px auto 0;padding-top:30px;border-top:1px solid #666;color:#aaa;font-size:14px;}
+/* ===== 至尊SVIP专属弹窗样式 ===== */
+.svip-modal{
+    position:relative;
+    z-index:99999;
+    padding:55px 40px;
+    border-radius:28px;
+    width:90%;
+    max-width:500px;
+    background:linear-gradient(135deg,#ff0044,#ff9900,#ffff00,#00ff88,#00ccff,#9944ff,#ff33aa);
+    background-size:400% 400%;
+    animation:svipRainbow 2s ease infinite, svipPop 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+    box-shadow:
+        0 0 50px rgba(255,100,200,0.9),
+        0 0 100px rgba(255,200,0,0.7),
+        inset 0 0 40px rgba(255,255,255,0.35);
+    border:4px solid #fff;
+    text-align:center;
+}
+@keyframes svipRainbow{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+@keyframes svipPop{
+    0%{opacity:0;transform:scale(0.2) rotate(-15deg);}
+    70%{transform:scale(1.1) rotate(3deg);}
+    100%{opacity:1;transform:scale(1) rotate(0);}
+}
+.svip-title{
+    font-size:34px;
+    font-weight:900;
+    color:#fff;
+    text-shadow:
+        0 0 12px #fff,
+        0 0 25px #ff0080,
+        0 0 40px #ff0080,
+        3px 3px 0 #000;
+    margin-bottom:35px;
+    line-height:1.5;
+    letter-spacing:3px;
+    -webkit-text-stroke:1.5px #000;
+}
+.svip-btn{
+    padding:18px 60px;
+    font-size:22px;
+    font-weight:900;
+    color:#fff;
+    background:linear-gradient(90deg,#ff4400,#ffcc00);
+    border:none;
+    border-radius:50px;
+    cursor:pointer;
+    box-shadow:
+        0 6px 20px rgba(255,100,0,0.7),
+        inset 0 3px 0 rgba(255,255,255,0.5);
+    transition:all 0.2s;
+    letter-spacing:6px;
+}
+.svip-btn:hover{
+    transform:scale(1.1);
+    box-shadow:
+        0 8px 30px rgba(255,100,0,0.9),
+        inset 0 3px 0 rgba(255,255,255,0.5);
+}
+.svip-btn:active{
+    transform:scale(0.95);
+}
+/* ===== 破烂垃圾堆风格弹窗 ===== */
+.trash-modal{
+    position:relative;
+    z-index:99999;
+    padding:45px 30px;
+    width:90%;
+    max-width:380px;
+    background:#3a332a;
+    border:3px solid #1a1510;
+    box-shadow:
+        inset 0 0 25px rgba(0,0,0,0.85),
+        0 12px 35px rgba(0,0,0,0.9);
+    color:#b8a68a;
+    font-family:"SimSun","宋体",serif;
+    text-align:center;
+    transform:rotate(-1.5deg);
+    animation: trashShake 0.45s ease;
+    /* 不规则破损边缘 */
+    clip-path: polygon(
+        0% 6%, 4% 0%, 16% 2%, 32% 0%, 48% 3%, 62% 0%, 76% 2%, 92% 0%, 100% 6%,
+        98% 22%, 100% 42%, 97% 62%, 100% 82%, 98% 94%, 90% 100%, 74% 98%, 60% 100%, 44% 97%, 28% 100%, 12% 98%, 4% 100%, 0% 94%,
+        2% 78%, 0% 58%, 3% 38%, 0% 18%
+    );
+}
+@keyframes trashShake{
+    0%{opacity:0;transform:rotate(-4deg) scale(0.75);}
+    100%{opacity:1;transform:rotate(-1.5deg) scale(1);}
+}
+.trash-title{
+    font-size:21px;
+    font-weight:bold;
+    margin-bottom:32px;
+    color:#d4c2a6;
+    text-shadow:2px 2px 0 #000;
+    letter-spacing:2px;
+}
+.trash-btn{
+    padding:11px 38px;
+    background:#5c4d3a;
+    border:2px solid #2a2218;
+    color:#d4c2a6;
+    font-size:16px;
+    font-family:"SimSun","宋体",serif;
+    cursor:pointer;
+    border-radius:4px;
+    box-shadow:inset 0 0 12px rgba(0,0,0,0.6);
+    transition:0.2s;
+}
+.trash-btn:hover{
+    background:#6e5c45;
+    transform:scale(1.05);
+}
+.trash-btn:active{
+    transform:scale(0.95);
+}
+@media (max-width:768px){
+.top-title{font-size:28px;margin:10px 0 8px;}
+.page2{padding:0 8px 80px;}
+.folder-box{padding:16px;}
+.folder-title{font-size:16px;}
+.sub-links{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.sub-links a{padding:12px 8px;font-size:0.82rem;}
+.back-top{right:16px;bottom:60px;width:48px;height:48px;font-size:24px;}
+.modal-box, .vpn-box{padding:30px 20px;}
+.detail-icon{font-size:64px;}
+.detail-name{font-size:19px;}
+.detail-modal{padding:24px 18px;}
+.svip-modal{padding:40px 25px;max-width:90%;}
+.svip-title{font-size:24px;letter-spacing:2px;}
+.svip-btn{padding:14px 40px;font-size:18px;letter-spacing:4px;}
+.trash-modal{padding:35px 22px;max-width:90%;}
+.trash-title{font-size:18px;letter-spacing:1px;}
+.trash-btn{padding:9px 30px;font-size:15px;}
+}
+</style>
+</head>
+<body>
+<div class="mask" id="pwdMask">
+    <div class="modal-box">
+        <h3>请输入访问密码</h3>
+        <input type="password" id="pwdInput" placeholder="请输入密码">
+        <button type="button" class="btn-pink" id="pwdBtn">确认进入</button>
+    </div>
+</div>
+<div class="mask hidden" id="vpnMask">
+    <div class="vpn-box">
+        <h4>输入访问密码查看电脑VPN</h4>
+        <input type="password" id="vpnPwdInput" placeholder="请输入密码">
+        <button type="button" class="btn-blue" id="vpnPwdBtn">确认解锁</button>
+        <button type="button" class="btn-gray" id="vpnCloseBtn">取消</button>
+    </div>
+</div>
+<div class="mask hidden" id="errorMask">
+    <div class="modal-box">
+        <p class="err-text">密码错误，需要帮助请联系作者QQ：2248653591</p>
+        <div class="btn-row">
+            <button type="button" class="btn-pink" id="knowBtn">我知道了</button>
+            <button type="button" id="copyQqBtn">复制QQ</button>
+        </div>
+    </div>
+</div>
+<div class="mask hidden" id="successMask">
+    <div class="modal-box">
+        <p class="err-text">成功复制QQ</p>
+        <button type="button" class="btn-pink" id="successConfirmBtn">确定</button>
+    </div>
+</div>
+<!-- 至尊SVIP欢迎弹窗 -->
+<div class="mask hidden" id="svipMask">
+    <div class="svip-modal">
+        <h2 class="svip-title">欢迎至尊SVIP作者登录本网站</h2>
+        <button type="button" class="svip-btn" id="svipConfirmBtn">确 定</button>
+    </div>
+</div>
+<!-- 破烂弹窗1 -->
+<div class="mask hidden" id="trashMask1">
+    <div class="trash-modal">
+        <p class="trash-title">欢迎垃圾堆里的用户回来</p>
+        <button type="button" class="trash-btn" id="trashBtn1">确 定</button>
+    </div>
+</div>
+<!-- 破烂弹窗2 -->
+<div class="mask hidden" id="trashMask2">
+    <div class="trash-modal">
+        <p class="trash-title">小阳欢迎你来到至尊vip的网站</p>
+    </div>
+</div>
+<div class="mask hidden" id="tipMask">
+    <div class="tip-box" id="tipText">正在打开网页…</div>
+</div>
+<div class="mask hidden" id="detailMask">
+    <div class="detail-modal">
+        <span class="detail-close" id="detailClose">×</span>
+        <div class="detail-icon" id="detailIcon"></div>
+        <div class="detail-name" id="detailName"></div>
+        <input class="detail-link" id="detailLink" readonly>
+        <div class="detail-btn-wrap">
+            <button class="btn-copy" id="copyLinkBtn">复制链接</button>
+            <button class="btn-jump" id="jumpLinkBtn">跳转网页</button>
+        </div>
+    </div>
+</div>
+<!-- 顶部彩虹大字（最耀眼位置，已添加QQ） -->
+<h1 class="top-title">小阳个人资源网 | 小阳QQ2248653591</h1>
+<div class="page page2 main-content">
+    <div class="search-box">
+        <input id="searchInput" placeholder="输入关键词筛选工具" type="text">
+        <div class="empty-tip" id="emptyTip">未找到匹配文件</div>
+    </div>
+    <div class="folder-box collapsed" data-group="刷机官网">
+        <div class="folder-title">📂 刷机官网</div>
+        <div class="sub-links">
+            <a data-name="蓝奏云" href="https://www.lanzoui.com/">☁️ 蓝奏云</a>
+            <!-- 此处链接已替换为 https://www.123pan.com/，文字123云盘不变 -->
+            <a data-name="123云盘" href="https://www.123pan.com/">💾 123云盘</a>
+            <a data-name="小米包" href="https://xiaomirom.com/">📦 小米包</a>
+            <a data-name="小米刷机工具" href="https://xiaomirom.com/download-xiaomi-flash-tool-miflash/">📥 小米刷机工具</a>
+            <a data-name="小米BL官网" href="https://www.miui.com/unlock/download.html">🔓 小米BL官网</a>
+            <a data-name="NDM下载器" href="https://wwbjc.lanzoup.com/iPwR83aq0fmh">💻 NDM下载器</a>
+            <a data-name="MT官网" href="https://mt2.cn/download/">🛠️ MT官网</a>
+            <a data-name="scene官网" href="http://com.omarea.com/#/">⚙️ scene官网</a>
+            <a data-name="爱玩机官网" href="https://doc.byyoung.top/">🤖 爱玩机官网</a>
+            <a data-name="大侠阿木一加ROM" href="https://yun.daxiaamu.com/OnePlus_Roms/">📱 大侠阿木一加ROM</a>
+            <a data-name="萤火虫网站" href="httpsyhcres.top/">🔥 萤火虫网站</a>
+            <a data-name="月虹官网" href="https://yhyun.asia/">🌙 月虹官网</a>
+        </div>
+    </div>
+    <div class="folder-box collapsed" data-group="刷机工具">
+        <div class="folder-title">📂 刷机工具</div>
+        <div class="sub-links">
+            <a data-name="小阳模块" href="https://1850900448.share.123pan.cn/123pan/d7opvd-TvTD">📦 小阳模块</a>
+            <a data-name="刷机驱动" href="https://wwbjc.lanzouu.com/iNlof3r6em0d">🔧 刷机驱动</a>
+            <a data-name="联想刷机工具" href="https://meta.box.lenovo.com/v/link/view/17da39f7061040ba81e457583dc56fe0">📱 联想刷机工具</a>
+            <a data-name="QPST9008" href="https://wwbjc.lanzoup.com/ijZIn3knztsj">📡 QPST9008</a>
+            <a data-name="沐妍工具箱" href="https://wwbjc.lanzouu.com/iyus03ufa0ba">📱 沐妍工具箱（9008）</a>
+            <a data-name="刷机匣" href="https://1850900448.share.123pan.cn/123pan/d7opvd-vvTD">📦 刷机匣</a>
+            <a data-name="搞机助手" href="https://lsdy.lanzoui.com/b0bwa7gif">🤖 搞机助手</a>
+            <a data-name="紫罗兰" href="https://wwauy.lanzouv.com/ie36U3rt2yvc">🌸 紫罗兰</a>
+            <a data-name="UnlockTool" href="https://1821603385.share.123pan.cn/123pan/7xpfjv-iHs7H">🔓 UnlockTool</a>
+            <a data-name="过签名" href="https://1816769606.share.123pan.cn/123pan/O7V6Vv-K3T1v">📜 过签名</a>
+        </div>
+    </div>
+    <div class="folder-box collapsed" data-group="面具专区">
+        <div class="folder-title">📂 面具专区</div>
+        <div class="sub-links">
+            <a data-name="Magisk Delta" href="https://wwauy.lanzouv.com/iizVC3egzati">🧩 Magisk Delta</a>
+            <a data-name="SukiSU_v4.1.3" href="https://wwauy.lanzouv.com/ixd5q3rt24ij">🧩 SukiSU_v4.1.3</a>
+            <a data-name="APatch_11142" href="https://wwauy.lanzouv.com/i2KOX3egzbuf">🧩 APatch_11142</a>
+            <a data-name="FolkPatch_2.7.6" href="https://wwauy.lanzouv.com/i0wOt3egz92f">🧩 FolkPatch_2.7.6</a>
+            <a data-name="KernelSU_Next_12851" href="https://wwauy.lanzouv.com/iF4Ii3egza2b?webtp2&error=time?p">🧩 KernelSU_Next_12851</a>
+            <a data-name="KernelSU_v3.2.4" href="https://wwauy.lanzouv.com/ibu353rt25yb">🧩 KernelSU_v3.2.4</a>
+            <a data-name="Alpha_30600" href="https://wwauy.lanzouv.com/iU4Gz3egzc0b">🧩 Alpha_30600</a>
+            <a data-name="Magisk-v30.6" href="https://wwauy.lanzouv.com/iBOb03egzbhc">🧩 Magisk-v30.6</a>
+        </div>
+    </div>
+    <div class="folder-box collapsed" data-group="电脑官网">
+        <div class="folder-title">📂 电脑官网</div>
+        <div class="sub-links">
+            <!-- 新增3条链接 -->
+            <a data-name="古怪加速器" href="https://www.ggkuai.com/sem/fission/">🚀 古怪加速器</a>
+            <a data-name="搜狗输入法" href="https://shurufa.sogou.com/windows ">⌨️ 搜狗输入法</a>
+            <a data-name="steam" href="https://wwbjc.lanzouu.com/irZ7J3ulbsgf ">🎮 steam</a>
+            <!-- 原有链接 -->
+            <a data-name="Geek卸载工具" href="https://geekuninstaller.com/download">🧹 Geek</a>
+            <a data-name="百度网盘官网" href="https://pan.baidu.com/download#win">🗃️ 百度网盘</a>
+            <a data-name="夸克网盘官网" href="https://pan.quark.cn/">🗃️ 夸克网盘</a>
+            <a data-name="豆包官网" href="https://www.doubao.com/chat/">🤖 豆包</a>
+            <a data-name="微信PC官网" href="https://pc.weixin.qq.com/">💬 微信官网</a>
+            <a data-name="QQ官网" href="https://im.qq.com/index/#/">🐧 QQ官网</a>
+            <div class="folder-box collapsed" data-sub="TT官网">
+                <div class="folder-title">📂 TT官网</div>
+                <div class="sub-links">
+                    <a data-name="TT娱乐版" href="https://live.52tt.com/">🎮 TT娱乐版</a>
+                    <a data-name="TT游戏版" href="https://www.52tt.com/?channel=B59940517.win_gang_pc">🎮 TT游戏版</a>
+                </div>
+            </div>
+            <div class="folder-box collapsed" data-sub="音乐">
+                <div class="folder-title">📂 音乐</div>
+                <div class="sub-links">
+                    <a data-name="酷狗官网" href="https://download.kugou.com/">🎧 酷狗</a>
+                    <a data-name="网易云官网" href="https://music.163.com/">🎵 网易云</a>
+                    <a data-name="QQ音乐官网" href="y.qq.com/download/index.html">🎧 QQ音乐</a>
+                </div>
+            </div>
+            <div class="folder-box collapsed" data-sub="电脑录制">
+                <div class="folder-title">📂 电脑录制</div>
+                <div class="sub-links">
+                    <a data-name="EV录屏" href="https://www.ieway.cn/evcapture.html">🎥 EV录屏</a>
+                    <a data-name="sunwoo录屏" href="https://by.sunwoosoft.com/download">📹 sunwoo录屏</a>
+                    <a data-name="克克录音机" href="https://wwbjc.lanzouu.com/iX5nh3uhq5sf">🎙️ 克克录音机</a>
+                    <!-- 替换原TS录音机为天神-超品质录音机v3.0 -->
+                    <a data-name="天神-超品质录音机v3.0" href="https://wwbjc.lanzouu.com/idm7c3ulofkj">🎙️ 天神-超品质录音机v3.0</a>
+                </div>
+            </div>
+            <div class="folder-box collapsed" data-sub="防护软件">
+                <div class="folder-title">📂 防护软件</div>
+                <div class="sub-links">
+                    <a data-name="火绒安全" href="https://huorong.cn/">🛡️ 火绒安全</a>
+                    <a data-name="360安全卫士" href="https://weishi.360.cn/?r=bd">🛡️ 360安全卫士</a>
+                    <a data-name="2345安全" href="safe.2345.cc/">🛡️ 2345安全</a>
+                    <a data-name="金山毒霸" href="www.ijinshan.com/">🛡️ 金山毒霸</a>
+                    <a data-name="腾讯电脑管家" href="https://guanjia.qq.com/main.html">🛡️ 腾讯电脑管家</a>
+                </div>
+            </div>
+            <div class="folder-box collapsed" data-sub="电脑解压缩">
+                <div class="folder-title">📂 电脑解压缩</div>
+                <div class="sub-links">
+                    <a data-name="RARZIP官网" href="https://www.winrar.com.cn/download.htm">📦 RARZIP官网</a>
+                    <a data-name="7zip官网" href="7-zip.org/download.html">📦 7zip</a>
+                    <a data-name="Bandizip官网" href="https://www.bandisoft.com/bandizip/">📦 Bandizip官网</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="folder-box collapsed" data-group="电脑摧毁">
+        <div class="folder-title">📂 电脑摧毁</div>
+        <div class="sub-links">
+            <a data-name="摩纳哥全套" href="https://wwbjc.lanzouu.com/iN5kX3tgx8uf">🎰 摩纳哥全套</a>
+            <a data-name="电脑炸弹" href="https://wwbjc.lanzouu.com/iM5Du3tgxbdg">💣 电脑炸弹</a>
+        </div>
+    </div>
+    <div class="folder-box collapsed" data-group="声卡">
+        <div class="folder-title">📂 声卡</div>
+        <div class="sub-links">
+            <a data-name="客所思降级" href="https://wwbjc.lanzouu.com/i6OwW3tgxb4h">🎤 客所思降级</a>
+            <a data-name="客所思驱动官网" href="http://www.kesuosi.com/xz.htm">🎧 客所思驱动官网</a>
+            <a data-name="5.1军火库" href="https://1816769606.share.123pan.cn/123pan/O7V6Vv-pi91v">🔊 5.1军火库</a>
+            <a data-name="小阳虚拟声卡" href="https://share.feijipan.com/s/5Gdr0hRo">🎶 小阳虚拟声卡</a>
+        </div>
+    </div>
+    <div class="folder-box collapsed" data-group="电脑工具">
+        <div class="folder-title">📂 电脑工具</div>
+        <div class="sub-links">
+            <!-- 新增微软运行库 -->
+            <a data-name="微软运行库" href="https://wwbjc.lanzouu.com/iHiJy3ulc1ad ">📦 微软运行库</a>
+            <!-- 原有链接 -->
+            <a data-name="桌面图标提取" href="https://wwbjc.lanzoup.com/ijWld3thpq5g">🖼️ 桌面图标</a>
+            <a data-name="更换exe图标" href="https://wwbjc.lanzoup.com/iid463thpq6h">🔧 EXE图标替换</a>
+            <a data-name="酷狗概念版pc" href="1850900448.share.123pan.cn/123pan/d7opvd-oDxD">🎵 酷狗概念版PC</a>
+            <a data-name="win11轻松设置" href="https://wwbjc.lanzouu.com/ikPvB3apy91i">🪟 Win11设置工具</a>
+            <a data-name="重装电脑工具" href="https://wwbjc.lanzouu.com/irHqU3800uqd">💻 系统重装工具</a>
+            <a data-name="风灵月影" href="https://wwbjc.lanzouu.com/iuNx13tgy0mf">🎮 风灵月影</a>
+            <a data-name="WeModPro" href="https://wwbjc.lanzoup.com/iRrMf3tgynwd">🎮 WeMod专业版</a>
+            <a data-name="图吧工具箱" href="                           ">🛠️ 图吧工具箱</a>
+            <a data-name="电脑VPN" href="javascript:openVpnPwd()">🌐 电脑VPN</a>
+        </div>
+    </div>
+</div>
+<div class="back-top" id="backTopBtn" title="返回顶部">⬆️</div>
+<footer>© 2026 小阳个人资源网 | 仅供学习交流</footer>
+<script>
+window.addEventListener('DOMContentLoaded', function(){
+    const pwdMask = document.getElementById('pwdMask');
+    const pwdInput = document.getElementById('pwdInput');
+    const pwdBtn = document.getElementById('pwdBtn');
+    const mainContent = document.querySelector('.main-content');
+    const errorMask = document.getElementById('errorMask');
+    const svipMask = document.getElementById('svipMask');
+    const svipConfirmBtn = document.getElementById('svipConfirmBtn');
+    // 新增密码2
+    const validPwd = ['xiaoyang', '1', '2'];
+    // 破烂弹窗元素
+    const trashMask1 = document.getElementById('trashMask1');
+    const trashMask2 = document.getElementById('trashMask2');
+    const trashBtn1 = document.getElementById('trashBtn1');
+    function checkLogin(){
+        const val = pwdInput.value.trim();
+        if(validPwd.includes(val)){
+            pwdMask.classList.add('hidden');
+            mainContent.style.display = 'block';
+            if(val === 'xiaoyang'){
+                svipMask.classList.remove('hidden');
+            }else if(val === '1'){
+                // 密码1弹出第一个破烂弹窗
+                trashMask1.classList.remove('hidden');
+            }
+            // 密码2不执行任何弹窗，直接进入
+        }else{
+            errorMask.classList.remove('hidden');
+            pwdInput.value = '';
+            pwdInput.focus();
+        }
+    }
+    // 破烂弹窗逻辑
+    trashBtn1.onclick = ()=>{
+        trashMask1.classList.add('hidden');
+        trashMask2.classList.remove('hidden');
+        // 2秒后自动关闭第二个弹窗
+        setTimeout(()=>{
+            trashMask2.classList.add('hidden');
+        }, 2000);
+    };
+    pwdBtn.onclick = checkLogin;
+    pwdInput.addEventListener('keydown', e=>e.key==='Enter'&&checkLogin());
+    svipConfirmBtn.onclick = ()=> svipMask.classList.add('hidden');
+    const knowBtn = document.getElementById('knowBtn');
+    const copyQqBtn = document.getElementById('copyQqBtn');
+    const successMask = document.getElementById('successMask');
+    const successConfirmBtn = document.getElementById('successConfirmBtn');
+    const qqNum = "2248653591";
+    knowBtn.onclick = ()=> errorMask.classList.add('hidden');
+    successConfirmBtn.onclick = ()=> successMask.classList.add('hidden');
+    copyQqBtn.onclick = async ()=>{
+        try{await navigator.clipboard.writeText(qqNum);}catch(e){
+            let t = document.createElement('textarea');
+            t.value = qqNum;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+        }
+        successMask.classList.remove('hidden');
+    };
+    const vpnMask = document.getElementById('vpnMask');
+    const vpnPwdInput = document.getElementById('vpnPwdInput');
+    const vpnPwdBtn = document.getElementById('vpnPwdBtn');
+    const vpnCloseBtn = document.getElementById('vpnCloseBtn');
+    const vpnUrl = "https://wwbjc.lanzouu.com/iX5nh3uhq5sf";
+    window.openVpnPwd = function(){
+        vpnMask.classList.remove('hidden');vpnPwdInput.value='';vpnPwdInput.focus();
+    };
+    vpnCloseBtn.onclick = ()=> vpnMask.classList.add('hidden');
+    vpnPwdBtn.onclick = ()=>{
+        if(vpnPwdInput.value.trim()==='1'){
+            vpnMask.classList.add('hidden');
+            showTip('正在打开VPN网页');
+            setTimeout(()=>window.open(vpnUrl,'_blank'),300);
+        }else{
+            errorMask.classList.remove('hidden');
+            vpnPwdInput.value='';vpnPwdInput.focus();
+        }
+    };
+    vpnPwdInput.addEventListener('keydown',e=>e.key==='Enter'&&vpnPwdBtn.click());
+    const tipMask = document.getElementById('tipMask');
+    const tipText = document.getElementById('tipText');
+    function showTip(txt){
+        tipText.innerText = txt;
+        tipMask.classList.remove('hidden');
+        setTimeout(()=>tipMask.classList.add('hidden'),1200);
+    }
+    const detailMask = document.getElementById('detailMask');
+    const detailClose = document.getElementById('detailClose');
+    const detailIcon = document.getElementById('detailIcon');
+    const detailName = document.getElementById('detailName');
+    const detailLink = document.getElementById('detailLink');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const jumpLinkBtn = document.getElementById('jumpLinkBtn');
+    let nowUrl = '';
+    // 链接协议自动补全工具函数（兜底修复）
+    function fixUrl(url) {
+        if (!url) return url;
+        if (url.startsWith('http') || url.startsWith('javascript:')) {
+            return url;
+        }
+        return 'https://' + url;
+    }
+    function openDetailModal(iconTxt,name,url){
+        // 修复链接协议
+        url = fixUrl(url);
+        detailIcon.innerText = iconTxt;
+        detailName.innerText = name;
+        detailLink.value = url;
+        nowUrl = url;
+        detailMask.classList.remove('hidden');
+    }
+    function closeDetailModal(){
+        detailMask.classList.add('hidden');
+    }
+    detailClose.onclick = closeDetailModal;
+    detailMask.addEventListener('click',e=>{
+        if(e.target === detailMask) closeDetailModal();
+    });
+    copyLinkBtn.onclick = async ()=>{
+        try{await navigator.clipboard.writeText(nowUrl);}catch(e){
+            let t=document.createElement('textarea');t.value=nowUrl;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+        }
+        showTip('链接复制成功');
+    };
+    jumpLinkBtn.onclick = ()=>{
+        closeDetailModal();
+        showTip('正在打开网页');
+        setTimeout(()=>window.open(nowUrl,'_blank'),300);
+    };
+    document.querySelectorAll('.folder-title').forEach(title=>{
+        title.onclick = function(){
+            this.closest('.folder-box').classList.toggle('collapsed');
+        }
+    });
+    const searchInput = document.getElementById('searchInput');
+    const emptyTip = document.getElementById('emptyTip');
+    const allFolderBox = Array.from(document.querySelectorAll('.folder-box'));
+    const allLink = Array.from(document.querySelectorAll('.sub-links a'));
+    function resetAllDisplay(){
+        allFolderBox.forEach(box=>{
+            box.style.display = '';
+            box.classList.add('collapsed');
+            box.querySelector('.folder-title').style.display = 'flex';
+            box.querySelectorAll('.sub-links > .folder-box').forEach(subFolder=>{
+                subFolder.style.display = '';
+            });
+        })
+        allLink.forEach(a=> a.style.display = 'block');
+        clearHighlight();
+        emptyTip.style.display = 'none';
+    }
+    function clearHighlight(){
+        document.querySelectorAll('.highlight').forEach(m=>{
+            let p=m.parentNode;p.replaceChild(document.createTextNode(m.textContent),m);p.normalize();
+        })
+    }
+    function setHighlight(parent,kw){
+        clearHighlight();
+        if(!kw) return;
+        let reg = new RegExp(`(${escapeReg(kw)})`,'gi');
+        function walk(n){
+            if(n.nodeType===3){
+                let txt=n.textContent;
+                if(txt.toLowerCase().includes(kw.toLowerCase())){
+                    let frag=document.createDocumentFragment();
+                    txt.split(reg).forEach(p=>{
+                        if(p.toLowerCase()===kw.toLowerCase()){
+                            let s=document.createElement('span');s.className='highlight';s.textContent=p;frag.appendChild(s);
+                        }else frag.appendChild(document.createTextNode(p));
+                    })
+                    n.parentNode.replaceChild(frag,n);
+                }
+                return;
+            }
+            if(n.nodeName!=='SCRIPT'&&n.nodeName!=='STYLE'&&!n.classList.contains('highlight')) Array.from(n.childNodes).forEach(walk);
+        }
+        parent.querySelectorAll('a[data-name]').forEach(walk);
+    }
+    function escapeReg(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+    searchInput.oninput = function(){
+        let kw = this.value.trim().toLowerCase();
+        if(!kw){
+            resetAllDisplay();
+            return;
+        }
+        let matchLinks = allLink.filter(a=> a.dataset.name.toLowerCase().includes(kw));
+        let matchCount = matchLinks.length;
+        allFolderBox.forEach(box=> box.style.display = 'none');
+        allLink.forEach(a=> a.style.display = 'none');
+        matchLinks.forEach(link=>{
+            link.style.display = 'block';
+            setHighlight(link.closest('.page2'), kw);
+            let parent = link.closest('.folder-box');
+            while(parent){
+                parent.style.display = '';
+                parent.classList.remove('collapsed');
+                parent.querySelector('.folder-title').style.display = 'none';
+                parent.querySelectorAll('.sub-links > .folder-box').forEach(subFolder=>{
+                    if(!subFolder.contains(link)) subFolder.style.display = 'none';
+                })
+                parent = parent.parentElement.closest('.folder-box');
+            }
+        })
+        emptyTip.style.display = matchCount === 0 ? 'block' : 'none';
+    }
+    document.querySelectorAll('.sub-links a').forEach(a=>{
+        a.onclick = function(e){
+            e.preventDefault();
+            let href = this.getAttribute('href');
+            if(href.startsWith('javascript')) return;
+            let fullText = this.innerText.trim();
+            let icon = fullText.split(' ')[0];
+            let name = fullText.slice(fullText.indexOf(' ')+1);
+            openDetailModal(icon,name,href);
+        }
+    })
+    document.getElementById('backTopBtn').onclick = ()=>{
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+})
+</script>
+</body>
+</html>
